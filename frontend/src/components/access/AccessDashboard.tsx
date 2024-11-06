@@ -14,7 +14,21 @@ export default function AccessDashboard() {
     face: null as string | null,
     timestamp: null as string | null
   })
-  const [detections, setDetections] = useState<any[]>([])
+
+  // First, add the Detection interface at the top of your file
+  interface Detection {
+    type: 'face' | 'plate';
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    label: string;
+    confidence?: number;
+    raw_text?: string;
+  }
+
+  // Update the detections state with the interface
+  const [detections, setDetections] = useState<Detection[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -252,6 +266,32 @@ export default function AccessDashboard() {
             <CardTitle>Recognition Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Real-time Detections */}
+            <div className="space-y-2">
+              <h3 className="font-medium text-sm">Current Detections</h3>
+              {detections.map((detection, index) => (
+                <div key={index} className="p-3 bg-muted rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">
+                      {detection.type === 'face' ? '👤 Face' : '🚗 Plate'}
+                    </span>
+                    {detection.confidence && (
+                      <span className="text-xs text-muted-foreground">
+                        {(detection.confidence * 100).toFixed(1)}% confidence
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm mt-1">{detection.label}</p>
+                </div>
+              ))}
+              {detections.length === 0 && (
+                <div className="text-sm text-muted-foreground italic">
+                  No detections yet
+                </div>
+              )}
+            </div>
+
+            {/* Verified Recognition */}
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">License Plate</p>
               <p className="font-medium">{recognition.plate || 'Not detected'}</p>
